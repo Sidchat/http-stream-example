@@ -1,8 +1,10 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
 
 const path = require("path");
+const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const WorkboxWebpackPlugin = require("workbox-webpack-plugin");
+const nodeExternals = require('webpack-node-externals');
 
 const isProduction = process.env.NODE_ENV == "production";
 
@@ -10,7 +12,10 @@ const stylesHandler = "style-loader";
 
 const config = {
   entry: "./src/index.ts",
+  target: "node19.8",
   output: {
+    clean: true,
+    compareBeforeEmit: true,
     path: path.resolve(__dirname, "dist"),
   },
   devServer: {
@@ -21,7 +26,9 @@ const config = {
     new HtmlWebpackPlugin({
       template: "index.html",
     }),
-
+    new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
+      resource.request = resource.request.replace(/^node:/, "");    //Handles the node libraries
+    }),
     // Add your plugins here
     // Learn more about plugins from https://webpack.js.org/configuration/plugins/
   ],
@@ -48,6 +55,7 @@ const config = {
   resolve: {
     extensions: [".tsx", ".ts", ".jsx", ".js", "..."],
   },
+  externals: [nodeExternals()],
 };
 
 module.exports = () => {
